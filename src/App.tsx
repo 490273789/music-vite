@@ -1,10 +1,12 @@
+import { useRoutes, BrowserRouter } from 'react-router-dom'
+import routes from './routes'
+
+const Element = () => useRoutes(routes)
 function App() {
   return (
-    <div className="App">
-      <div></div>
-
-      <h1>Vite + React</h1>
-    </div>
+    <BrowserRouter>
+      <Element />
+    </BrowserRouter>
   )
 }
 

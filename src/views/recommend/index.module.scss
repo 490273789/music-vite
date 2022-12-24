@@ -1,0 +1,45 @@
+.recommend-wrap {
+  position: fixed;
+  top: 94px;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+
+  .list-title {
+    padding-left: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 60px;
+  }
+
+  .list-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+
+    .list-item {
+      position: relative;
+      width: 32%;
+
+      > img {
+        border-radius: 3px;
+      }
+    }
+  }
+
+  .item-title {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 12px;
+    color: $white;
+  }
+
+  .item-name {
+    height: 50px;
+    overflow: hidden;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #2e3030;
+  }
+}

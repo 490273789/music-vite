@@ -1,0 +1,11 @@
+.no-wrap {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bg-full {
+  background-repeat: no-repeat;
+  background-position: 50%;
+  background-size: contain;
+}

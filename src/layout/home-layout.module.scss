@@ -1,0 +1,33 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  padding: 5px 10px;
+  font-size: 20px;
+  color: #f1f1f1;
+  background-color: $theme-color;
+}
+
+.tab-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  color: #fff;
+  background-color: $theme-color;
+
+  > li {
+    flex: 1;
+    text-align: center;
+  }
+
+  .tab-name {
+    border-bottom: 2px solid opacity;
+
+    &.active {
+      font-weight: 700;
+      border-bottom: 2px solid #f1f1f1;
+    }
+  }
+}
