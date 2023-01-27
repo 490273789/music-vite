@@ -4,26 +4,38 @@ import {
   ReactElement,
   useRef,
   useState,
+  useEffect,
   useImperativeHandle
 } from 'react'
 import BScroll, { BScrollInstance } from '@better-scroll/core'
-import styles from './index.module.scss'
-import { useEffect } from 'react'
+import PullUp from '@better-scroll/pull-up'
+import PullDown from '@better-scroll/pull-down'
 import { BScrollConstructor } from '@better-scroll/core/dist/types/BScroll'
+import styles from './index.module.scss'
+import Loading from '@components/loading-v1'
+import LoadingV2 from '@components/loading-v2'
 
 export interface ScrollProps {
+  // 横向或竖向滚动
   direction?: 'vertical' | 'horizontal'
+  // 默认会禁用掉原生的click事件
   click?: boolean
+  // 是否刷新
   refresh?: boolean
-  onScroll?: () => undefined
-  pullUp?: () => undefined
-  pullDown?: () => undefined
-  pullUpLoading?: false
-  pullDownLoading?: false
-  bounceTop?: true
-  bounceBottom?: true
+  // scroll的事件回调函数
+  onScroll?: () => void
+  pullUp?: () => void
+  pullDown?: () => void
+  pullUpLoading?: boolean
+  pullDownLoading?: boolean
+  // 当滚动超过边缘的时候会有一小段回弹动画。设置为 true 则开启动画。
+  bounceTop?: boolean
+  bounceBottom?: boolean
   children?: ReactElement
 }
+
+BScroll.use(PullUp)
+BScroll.use(PullDown)
 
 const Scroll = forwardRef(
   (
@@ -34,6 +46,8 @@ const Scroll = forwardRef(
       onScroll,
       pullUp,
       pullDown,
+      pullUpLoading = false,
+      pullDownLoading = false,
       bounceTop = true,
       bounceBottom = true,
       children
@@ -41,9 +55,9 @@ const Scroll = forwardRef(
     ref
   ) => {
     const [bScroll, setBScroll] = useState<BScrollConstructor>()
-
+    // 滚动的元素
     const scrollContainerRef = useRef<HTMLDivElement>(null)
-
+    // 创建实例
     useEffect(() => {
       const scroll = new BScroll(scrollContainerRef.current as HTMLDivElement, {
         scrollX: direction === 'horizontal',
@@ -72,8 +86,10 @@ const Scroll = forwardRef(
     useEffect(() => {
       if (!bScroll || !pullUp) return
       const handlePullUp = () => {
+        // bScroll.y和bScroll.maxScrollY都为负数
         if (bScroll.y <= bScroll.maxScrollY + 100) pullUp()
       }
+      // 监听滚动停止事件
       bScroll.on('scrollEnd', handlePullUp)
       return () => {
         bScroll.off('scrollEnd', handlePullUp)
@@ -83,25 +99,23 @@ const Scroll = forwardRef(
     // 下拉刷新
     useEffect(() => {
       if (!bScroll || !pullDown) return
-
       const handlePullDown = (event: BScrollInstance) => {
-        console.log(event)
         if (event.y > 50) pullDown()
       }
-
       bScroll.on('touchEnd', handlePullDown)
-
       return () => {
         bScroll.off('touchEnd', handlePullDown)
       }
     }, [bScroll, pullDown])
 
+    // 刷新scroll
     useEffect(() => {
       if (refresh && bScroll) {
         bScroll.refresh()
       }
-    }, [refresh, bScroll])
+    })
 
+    // 给ref添加不同的方法
     useImperativeHandle(ref, () => ({
       refresh() {
         if (bScroll) {
@@ -119,7 +133,16 @@ const Scroll = forwardRef(
     return (
       <div className={styles['scroll-container']} ref={scrollContainerRef}>
         {children}
-        <div></div>
+        {pullDownLoading && (
+          <div className={styles['pull-up']}>
+            <Loading />
+          </div>
+        )}
+        {pullUpLoading && (
+          <div className={styles['pull-down']}>
+            <LoadingV2 />
+          </div>
+        )}
       </div>
     )
   }

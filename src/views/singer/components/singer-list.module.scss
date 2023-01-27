@@ -7,4 +7,24 @@
   .title {
     margin: 10px 0 10px 10px;
   }
+
+  .singer-item {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    margin: 0 5px;
+    border-bottom: 1px solid #e4e4e4;
+  }
+
+  .singer-pic {
+    width: 50px;
+    height: 50px;
+    padding: 5px 0;
+    margin-right: 20px;
+  }
+
+  .singer-name {
+    font-weight: 500;
+    color: #2e3030;
+  }
 }

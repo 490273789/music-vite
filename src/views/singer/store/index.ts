@@ -50,7 +50,7 @@ const singerSlice = createSlice({
   },
   extraReducers(builder) {
     builder.addCase(getHotSingerData.fulfilled, (state, { payload }) => {
-      state.singerList = payload.artists
+      state.singerList = payload?.artists
       if (state.enterLoading) state.enterLoading = false
     })
     builder.addCase(getSingerData.fulfilled, (state, { payload }) => {

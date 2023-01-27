@@ -1,6 +1,6 @@
-import { Suspense, lazy, ReactNode } from 'react'
+import React, { Suspense, lazy, ReactNode } from 'react'
+import { Navigate, createBrowserRouter } from 'react-router-dom'
 import Loading from '@/components/loading-v1'
-import { Navigate } from 'react-router-dom'
 import HomeLayout from '@/layout/home-layout'
 import { isString } from '../utils/index'
 
@@ -56,9 +56,7 @@ const routes: RouteObject[] = [
 
 // 返回懒加载元素
 const LazyElement = (path: string): ReactNode => {
-  const ImportComponent = lazy(
-    () => import(/* @vite-ignore */ `@/views/${path}/index.tsx`)
-  )
+  const ImportComponent = lazy(() => import(`@/views/${path}/index.tsx`))
   return (
     <Suspense fallback={<Loading />}>
       <ImportComponent />
@@ -78,8 +76,6 @@ const handleFilterElement = (routes: RouteObject[]) => {
   return res
 }
 
-const finalRoutes = handleFilterElement(routes)
-
-console.log(finalRoutes)
+const finalRoutes = createBrowserRouter(handleFilterElement(routes))
 
 export default finalRoutes

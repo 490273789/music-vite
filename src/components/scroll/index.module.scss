@@ -3,3 +3,21 @@
   height: 100%;
   overflow: hidden;
 }
+
+.pull-up {
+  position: absolute;
+  right: 0;
+  bottom: 5px;
+  left: 0;
+  width: 60px;
+  height: 60px;
+  margin: auto;
+}
+
+.pull-down {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 30px;
+}

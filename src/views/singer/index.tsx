@@ -1,20 +1,26 @@
-import { memo, useEffect } from 'react'
+import { memo, useEffect, useRef } from 'react'
 import styles from './index.module.scss'
 import Horizon from './components/horizon'
 import SingerList from '@/views/singer/components/signer-list'
 import Scroll from '@components/scroll'
 import Loading from '@components/loading-v1'
+import { forceCheck } from 'react-lazyload'
 import { categoryTypes, areaTypes, alphaTypes } from '@/utils/map'
 import { useAppDispatch, useAppSelector } from '@/hooks/react-redux'
 import { changeParams, getSingerData, getHotSingerData } from './store'
 import { SingerListParams } from './type'
 
 const Singer = () => {
+  const scrollRef = useRef(null)
   const dispatch = useAppDispatch()
 
   const params = useAppSelector((state) => state.singer.params)
   const singerList = useAppSelector((state) => state.singer.singerList)
   const enterLoading = useAppSelector((state) => state.singer.enterLoading)
+  const pullDownLoading = useAppSelector(
+    (state) => state.singer.pullDownLoading
+  )
+  const pullUpLoading = useAppSelector((state) => state.singer.pullUpLoading)
 
   // 初始化获取热门歌手列表
   useEffect(() => {
@@ -43,17 +49,14 @@ const Singer = () => {
   }
 
   // // 下拉刷新
-  // const pullDownRefresh = () => {
-  //   console.log('下拉刷新')
-  //   return '下拉刷新'
-  // }
+  const pullDownRefresh = () => {
+    console.log('下拉刷新')
+  }
 
   // // 上拉刷新
-  // const pullDownRefresh = () => {
-  //   console.log('上拉刷新')
-  // }
-
-  console.log('singerList', singerList)
+  const pullUpRefresh = () => {
+    console.log('上拉刷新')
+  }
 
   return (
     <div>
@@ -78,7 +81,14 @@ const Singer = () => {
         />
       </div>
       <div className={styles['list-container']}>
-        <Scroll>
+        <Scroll
+          ref={scrollRef}
+          onScroll={forceCheck}
+          pullUp={pullUpRefresh}
+          pullDown={pullDownRefresh}
+          pullUpLoading={pullUpLoading}
+          pullDownLoading={pullDownLoading}
+        >
           <SingerList singerList={singerList} />
         </Scroll>
       </div>
