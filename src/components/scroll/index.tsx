@@ -133,12 +133,12 @@ const Scroll = forwardRef(
     return (
       <div className={styles['scroll-container']} ref={scrollContainerRef}>
         {children}
-        {pullDownLoading && (
+        {pullUpLoading && (
           <div className={styles['pull-up']}>
             <Loading />
           </div>
         )}
-        {pullUpLoading && (
+        {pullDownLoading && (
           <div className={styles['pull-down']}>
             <LoadingV2 />
           </div>

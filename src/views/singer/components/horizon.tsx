@@ -6,7 +6,7 @@ export interface HorizonProps {
   list: categoryData[]
   currentVal: string
   title: string
-  handleClick: (key: string) => any
+  handleClick: (key: string, type: string) => any
 }
 
 export interface categoryData {
@@ -31,7 +31,7 @@ const Horizon = (props: HorizonProps) => {
 
   // 点击每一项
   const handleClickItem = (ele: categoryData) => {
-    handleClick(ele.key)
+    handleClick(ele.key, title)
   }
 
   return (

@@ -1,5 +1,4 @@
 import { memo, useEffect, useRef } from 'react'
-import styles from './index.module.scss'
 import Horizon from './components/horizon'
 import SingerList from '@/views/singer/components/signer-list'
 import Scroll from '@components/scroll'
@@ -7,14 +6,34 @@ import Loading from '@components/loading-v1'
 import { forceCheck } from 'react-lazyload'
 import { categoryTypes, areaTypes, alphaTypes } from '@/utils/map'
 import { useAppDispatch, useAppSelector } from '@/hooks/react-redux'
-import { changeParams, getSingerData, getHotSingerData } from './store'
-import { SingerListParams } from './type'
+import {
+  getSingerData,
+  refreshMoreHotSingerData,
+  refreshMoreSingerData,
+  getHotSingerData,
+  updateType,
+  updateArea,
+  updateInitial,
+  updateOffset,
+  changeEnterLoading,
+  changePullUpLoading,
+  changePullDownLoading
+} from './store'
+import styles from './index.module.scss'
+
+enum selectClass {
+  'TYPE' = '分类（默认热门）：',
+  'AREA' = '地区：',
+  'INITIAL' = '首字母：'
+}
 
 const Singer = () => {
   const scrollRef = useRef(null)
   const dispatch = useAppDispatch()
 
-  const params = useAppSelector((state) => state.singer.params)
+  const type = useAppSelector((state) => state.singer.type)
+  const area = useAppSelector((state) => state.singer.area)
+  const initial = useAppSelector((state) => state.singer.initial)
   const singerList = useAppSelector((state) => state.singer.singerList)
   const enterLoading = useAppSelector((state) => state.singer.enterLoading)
   const pullDownLoading = useAppSelector(
@@ -22,40 +41,52 @@ const Singer = () => {
   )
   const pullUpLoading = useAppSelector((state) => state.singer.pullUpLoading)
 
+  const isHot = () => type === '' && area === '' && initial === ''
+
   // 初始化获取热门歌手列表
   useEffect(() => {
-    dispatch(getHotSingerData())
+    if (!singerList.length) {
+      dispatch(changeEnterLoading(true))
+      dispatch(getHotSingerData())
+    }
   }, [dispatch])
-
-  // 切换条件调用接口
-  const requestSinger = (data: SingerListParams) => {
-    dispatch(changeParams(data))
-    dispatch(getSingerData(data))
-  }
-
-  // 更换分类
-  const changeCategory = (val: string) => {
-    requestSinger({ ...params, type: val, offset: 0 })
-  }
-
-  // 更换地区
-  const changeArea = (val: string) => {
-    requestSinger({ ...params, area: val, offset: 0 })
-  }
-
-  // 更换首字母
-  const changeAlpha = (val: string) => {
-    requestSinger({ ...params, initial: val, offset: 0 })
-  }
 
   // // 下拉刷新
   const pullDownRefresh = () => {
-    console.log('下拉刷新')
+    dispatch(changePullDownLoading(true))
+    dispatch(updateOffset(0))
+    isHot() ? dispatch(getHotSingerData()) : dispatch(getSingerData())
   }
 
   // // 上拉刷新
   const pullUpRefresh = () => {
-    console.log('上拉刷新')
+    dispatch(changePullUpLoading(true))
+    isHot()
+      ? dispatch(refreshMoreHotSingerData())
+      : dispatch(refreshMoreSingerData())
+  }
+
+  /**
+   * 切换分类
+   * @param val 选择的值
+   * @param filter 哪个分类
+   */
+  const exchangeClass = (val: string, filter: string) => {
+    switch (filter) {
+      case selectClass.AREA:
+        dispatch(updateArea(val))
+        break
+      case selectClass.TYPE:
+        dispatch(updateType(val))
+        break
+      case selectClass.INITIAL:
+        dispatch(updateInitial(val))
+        break
+      default:
+        return
+    }
+    dispatch(updateOffset(0))
+    dispatch(getSingerData)
   }
 
   return (
@@ -63,21 +94,21 @@ const Singer = () => {
       <div className={styles['nav-wrap']}>
         <Horizon
           list={categoryTypes}
-          currentVal={params.type}
-          title="分类（默认热门）："
-          handleClick={changeCategory}
+          currentVal={type}
+          title={selectClass.TYPE}
+          handleClick={exchangeClass}
         />
         <Horizon
           list={areaTypes}
-          currentVal={params.area}
-          title="地区："
-          handleClick={changeArea}
+          currentVal={area}
+          title={selectClass.AREA}
+          handleClick={exchangeClass}
         />
         <Horizon
           list={alphaTypes}
-          currentVal={params.initial}
-          title="首字母："
-          handleClick={changeAlpha}
+          currentVal={initial}
+          title={selectClass.INITIAL}
+          handleClick={exchangeClass}
         />
       </div>
       <div className={styles['list-container']}>

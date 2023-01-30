@@ -7,10 +7,9 @@ export interface SingerListParams {
 }
 
 // 初始化状态
-export interface InitSingerState {
+export interface InitSingerState extends SingerListParams {
   /** 歌手列表 */
   singerList: SingerObject[]
-  params: SingerListParams
   // 第一次进入页面的加载动画
   enterLoading: boolean
   pullDownLoading: boolean

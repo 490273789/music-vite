@@ -1,43 +1,80 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
-import { InitSingerState, SingerListParams } from '../type'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { InitSingerState } from '../type'
 import { getSingerListRequest, getHotSingerListRequest } from '@/api'
+import { createAppAsyncThunk } from '@/store/utils'
 
 // 获取热门歌手列表
-export const getHotSingerData = createAsyncThunk(
+export const getHotSingerData = createAppAsyncThunk(
   'singer/getHotSinger',
-  async () => await getHotSingerListRequest(0)
+  async (_, thunkAPI) => {
+    const { offset } = thunkAPI.getState().singer
+    return await getHotSingerListRequest(offset)
+  }
+)
+
+// 获取热门歌手列表
+export const refreshMoreHotSingerData = createAppAsyncThunk(
+  'singer/refreshMoreHotSinger',
+  async (_, thunkAPI) => {
+    const { offset } = thunkAPI.getState().singer
+    return await getHotSingerListRequest(offset)
+  }
 )
 
 // 获取歌手列表
-export const getSingerData = createAsyncThunk(
+export const getSingerData = createAppAsyncThunk(
   'singer/getSinger',
-  async (params: SingerListParams) => await getSingerListRequest(params)
+  async (_, thunkAPI) => {
+    const { type, area, initial, offset } = thunkAPI.getState().singer
+    return await getSingerListRequest({ type, area, initial, offset })
+  }
+)
+
+// 加载更多歌手列表
+export const refreshMoreSingerData = createAppAsyncThunk(
+  'singer/refreshMoreSinger',
+  async (_, thunkAPI) => {
+    const { type, area, initial, offset } = thunkAPI.getState().singer
+    const result = await getSingerListRequest({ type, area, initial, offset })
+    return result?.artists || []
+  }
 )
 
 // 初始化状态
 const initialState: InitSingerState = {
   singerList: [],
-  enterLoading: true,
+  enterLoading: false,
   pullDownLoading: false,
   pullUpLoading: false,
-  params: {
-    type: '',
-    area: '',
-    initial: '',
-    offset: 0
-  }
+  type: '',
+  area: '',
+  initial: '',
+  offset: 0
 }
 
 const singerSlice = createSlice({
   name: 'singer',
   initialState,
   reducers: {
-    changeParams: (state, { payload }: PayloadAction<SingerListParams>) => {
-      state.params = payload
+    updateType: (state, { payload }: PayloadAction<string>) => {
+      state.type = payload
+    },
+
+    updateArea: (state, { payload }: PayloadAction<string>) => {
+      state.area = payload
+    },
+
+    updateInitial: (state, { payload }: PayloadAction<string>) => {
+      state.initial = payload
+    },
+
+    updateOffset: (state, { payload }: PayloadAction<number>) => {
+      state.offset = payload
+      console.log('1', state.offset)
     },
 
     changeEnterLoading: (state, { payload }: PayloadAction<boolean>) => {
-      state.pullUpLoading = payload
+      state.enterLoading = payload
     },
 
     changePullUpLoading: (state, { payload }: PayloadAction<boolean>) => {
@@ -50,18 +87,44 @@ const singerSlice = createSlice({
   },
   extraReducers(builder) {
     builder.addCase(getHotSingerData.fulfilled, (state, { payload }) => {
-      state.singerList = payload?.artists
-      if (state.enterLoading) state.enterLoading = false
+      state.singerList = payload?.artists || []
+      state.offset = state.singerList.length
+      state.enterLoading = false
+      state.pullDownLoading = false
     })
+
+    builder.addCase(
+      refreshMoreHotSingerData.fulfilled,
+      (state, { payload }) => {
+        const result = payload?.artists || []
+        state.singerList = [...state.singerList, ...result]
+        state.offset = state.singerList.length
+        state.pullUpLoading = false
+      }
+    )
+
     builder.addCase(getSingerData.fulfilled, (state, { payload }) => {
-      state.singerList = payload.artists
+      state.singerList = payload?.artists || []
+      state.offset = state.singerList.length
+      state.enterLoading = false
+      state.pullDownLoading = false
+    })
+
+    builder.addCase(refreshMoreSingerData.fulfilled, (state, { payload }) => {
+      state.singerList = [...state.singerList, ...payload]
+      state.offset = state.singerList.length
+      state.pullUpLoading = false
     })
   }
 })
 export const {
+  updateType,
+  updateArea,
+  updateInitial,
+  updateOffset,
   changeEnterLoading,
   changePullUpLoading,
-  changePullDownLoading,
-  changeParams
+  changePullDownLoading
 } = singerSlice.actions
+
 export default singerSlice.reducer
