@@ -86,7 +86,7 @@ const Singer = () => {
         return
     }
     dispatch(updateOffset(0))
-    dispatch(getSingerData)
+    dispatch(getSingerData())
   }
 
   return (
